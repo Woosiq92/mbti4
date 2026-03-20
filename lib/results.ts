@@ -137,7 +137,7 @@ function generateResultTitle(mbtiChoice: MbtiChoice, sasang: SasangTypeId): stri
   }
 
   if (role === "동기부여가") {
-    // "내면형 동기부여가" 같은 어색함을 피하기 위해 토ন 단어(관계)를 함께 사용
+    // "내면형 동기부여가" 같은 어색함을 피하기 위해 톤 단어(관계)를 함께 사용
     return `${sasangPrefix} ${tone} ${role}`;
   }
 
@@ -216,6 +216,24 @@ function firstSentence(text: string): string {
   return (m?.[0] ?? text).trim();
 }
 
+function toSoftTypePyeonida(text: string): string {
+  // MBTI 데이터의 "유형입니다" 같은 마무리를 브랜드 톤(편입니다)으로 맞춥니다.
+  return text.replace(/유형입니다[.!?]?$/, "편입니다.");
+}
+
+function buildGeneratedSummary(
+  mbtiChoice: MbtiChoice,
+  sasang: SasangTypeId
+): string {
+  const mbtiEntry = getMbtiEntry(mbtiChoice);
+  const sasangMeta = SASANG_META[sasang];
+
+  const strengthSentence = toSoftTypePyeonida(firstSentence(mbtiEntry.summary));
+  const rhythmBase = sasangMeta.sasangSummary.replace(/성향\s*$/, "").trim();
+
+  return `${strengthSentence} ${rhythmBase}에 가까운 생활 리듬이 함께 보이는 편입니다.`;
+}
+
 function defaultTraitsFromCore(core: string[]): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
@@ -259,15 +277,16 @@ function buildResultBase(
 
   const resultTitle = getResultTitle(mbtiChoice, sasang);
 
-  const summary = card?.summary ?? firstSentence(mbtiEntry.summary);
+  const summary = card?.summary ?? buildGeneratedSummary(mbtiChoice, sasang);
   const traits = card?.traits ?? defaultTraitsFromCore(coreFeatures);
 
   const oneLine = `${mbtiEntry.summary} 사상체질(${sasangMeta.name}) 관점에서는 ${sasangMeta.sasangSummary}이(가) 함께 얹혀 보일 수 있습니다.`;
 
   const relationshipStyle = `${mbtiEntry.relationshipStyle} 또한 ${sasangMeta.relationshipStyle}`;
-  const studyWorkStyle = `${mbtiEntry.workStyle} 또한 ${sasangMeta.studyWorkStyle}`;
-  const stressResponse = `${mbtiEntry.stressStyle} 또한 ${sasangMeta.stressResponse}`;
-  const recoveryTip = `${mbtiEntry.growthTip} 또한 ${sasangMeta.recoveryTip}`;
+  // 1문장 + 1문장 구조로 문체를 통일합니다.
+  const studyWorkStyle = `${mbtiEntry.workStyle} ${sasangMeta.studyWorkStyle}`;
+  const stressResponse = `${mbtiEntry.stressStyle} ${sasangMeta.stressResponse}`;
+  const recoveryTip = `${mbtiEntry.growthTip} ${sasangMeta.recoveryTip}`;
   const loveStyle = getLoveStyleLine(mbtiChoice);
 
   const evidenceHeader =

@@ -1,5 +1,28 @@
 import Link from "next/link";
 
+import type { Metadata } from "next";
+
+const SITE_NAME = "MBTI × 사상체질 연구소";
+
+export const metadata: Metadata = {
+  title: `개인정보처리방침 | ${SITE_NAME}`,
+  description: `MBTI × 사상체질 연구소의 개인정보처리방침입니다.`,
+  openGraph: {
+    title: `개인정보처리방침 | ${SITE_NAME}`,
+    siteName: SITE_NAME,
+    description: `MBTI × 사상체질 연구소의 개인정보처리방침입니다.`,
+    type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: SITE_NAME }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `개인정보처리방침 | ${SITE_NAME}`,
+    description: `MBTI × 사상체질 연구소의 개인정보처리방침입니다.`,
+    images: ["/og-image.png"],
+    creator: "USC",
+  },
+};
+
 export default function PrivacyPage() {
   return (
     <main className="min-h-screen bg-neutral-50 text-neutral-900">

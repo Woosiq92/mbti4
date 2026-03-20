@@ -40,7 +40,8 @@ export const SASANG_META: Record<SasangTypeId, SasangMeta> = {
 
     stressResponse: "긴장이 올라오면 예민해지거나 열이 올라오는 느낌이 커질 수 있습니다.",
 
-    recoveryTip: "짧고 명확한 목표로 속도를 정리하고, 즉시 휴식 루틴을 함께 두세요.",
+    recoveryTip:
+      "짧고 명확한 목표로 속도를 정리하고, 즉시 휴식 루틴을 함께 두는 편이 도움이 됩니다.",
 
   },
 
@@ -58,7 +59,8 @@ export const SASANG_META: Record<SasangTypeId, SasangMeta> = {
 
     stressResponse: "변동이 계속되면 에너지가 느리게 빠져나가며 무기력해질 수 있어요.",
 
-    recoveryTip: "루틴을 회복하고, ‘한 번 더’가 아닌 ‘제대로’만 맞춰서 회복하세요.",
+    recoveryTip:
+      "루틴을 회복하고, ‘한 번 더’가 아닌 ‘제대로’만 맞춰서 회복하는 쪽이 도움이 됩니다.",
 
   },
 
@@ -76,7 +78,7 @@ export const SASANG_META: Record<SasangTypeId, SasangMeta> = {
 
     stressResponse: "스트레스가 쌓이면 예민함/열감이 먼저 올라올 수 있습니다.",
 
-    recoveryTip: "몸을 움직이거나 리듬 있는 활동으로 긴장을 풀어주는 게 효과적입니다.",
+    recoveryTip: "몸을 움직이거나 리듬 있는 활동으로 긴장을 풀어주는 게 도움이 됩니다.",
 
   },
 
@@ -94,7 +96,8 @@ export const SASANG_META: Record<SasangTypeId, SasangMeta> = {
 
     stressResponse: "압박이 길어지면 기운이 빠지고 생각이 깊어지며 위축될 수 있어요.",
 
-    recoveryTip: "조용한 환경에서 정리 시간을 확보하고, 회복 신호에 먼저 귀 기울이세요.",
+    recoveryTip:
+      "조용한 환경에서 정리 시간을 확보하고, 회복 신호에 먼저 귀 기울이는 편이 도움이 됩니다.",
 
   },
 

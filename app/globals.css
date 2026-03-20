@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply min-h-full bg-slate-50 text-slate-900 antialiased;
+}
+
+/* iOS에서 버튼 클릭 시 생기는 회색 깜빡임 완화 */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+

@@ -330,52 +330,6 @@ function ResultPageInner() {
           </div>
         </section>
 
-        {/* 근거 섹션 */}
-        <section className="mt-8 rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
-          <h2 className="text-lg font-bold tracking-tight text-neutral-900 sm:text-xl">
-            왜 이런 결과가 나왔을까요?
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-neutral-600 sm:text-base">
-            이 결과는 “답안 패턴” 또는 “조합 기반 요약”을 바탕으로, 단정이 아닌 경향으로
-            정리했어요.
-          </p>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-neutral-100 bg-neutral-50/80 p-5">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                반응 속도
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-800 sm:text-[0.9375rem]">
-                {result.evidence.reactionSpeed}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-neutral-100 bg-neutral-50/80 p-5">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                에너지 방향
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-800 sm:text-[0.9375rem]">
-                {result.evidence.energyDirection}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-neutral-100 bg-neutral-50/80 p-5">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                스트레스 패턴
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-800 sm:text-[0.9375rem]">
-                {result.evidence.stressPattern}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-neutral-100 bg-neutral-50/80 p-5">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                생활 리듬
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-800 sm:text-[0.9375rem]">
-                {result.evidence.lifeRhythm}
-              </p>
-            </div>
-          </div>
-        </section>
-
         {/* 상세 해석 */}
         <section className="mt-8 rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-base font-semibold text-neutral-900">연애 스타일</h2>

@@ -1,7 +1,7 @@
 import type { AnswerMap, MbtiChoice, MbtiType, SasangTypeId, TestResult } from "../types";
 import { mbtiData, unknownMbtiData, type MbtiDataEntry } from "./mbti-data";
 import { mbtiLoveStyle, unknownMbtiLoveStyle } from "./mbti-love-style";
-import { DISCLAIMER, RESULT_CARD_OVERRIDES, resultOverrideKey } from "./result-names";
+import { DISCLAIMER, RESULT_CARD_OVERRIDES } from "./result-names";
 import { SASANG_META } from "./sasang-data";
 import {
   buildEvidenceFromAnswers,
@@ -11,6 +11,193 @@ import {
   buildEvidenceMetricsFromCode,
   buildEvidenceMetricsFromCombination,
 } from "./scoring";
+import { MBTI_ORDER } from "./ui-mbti";
+
+type MbtiNaming = {
+  role: string;
+  tone: string;
+};
+
+const mbtiNaming: Record<string, MbtiNaming> = {
+  INTJ: { role: "설계자", tone: "전략" },
+  INTP: { role: "탐구자", tone: "분석" },
+  ENTJ: { role: "지휘관", tone: "확장" },
+  ENTP: { role: "개척자", tone: "발상" },
+  INFJ: { role: "조율자", tone: "통찰" },
+  INFP: { role: "해석자", tone: "내면" },
+  ENFJ: { role: "동기부여가", tone: "관계" },
+  ENFP: { role: "영감가", tone: "영감" },
+  ISTJ: { role: "관리자", tone: "원칙" },
+  ISFJ: { role: "수호자", tone: "배려" },
+  ESTJ: { role: "운영가", tone: "구조" },
+  ESFJ: { role: "조정자", tone: "조화" },
+  ISTP: { role: "해결사", tone: "실전" },
+  ISFP: { role: "창작자", tone: "감각" },
+  ESTP: { role: "플레이어", tone: "직진" },
+  ESFP: { role: "메이커", tone: "현장" },
+};
+
+const sasangNaming: Record<
+  SasangTypeId,
+  {
+    primaryPrefix: string;
+    altPrefixes: string[];
+    vibe: string;
+  }
+> = {
+  taeyang: {
+    primaryPrefix: "돌파형",
+    altPrefixes: ["확장형", "비전형", "강한 발현의"],
+    vibe: "위로 뻗는 추진력",
+  },
+  taeum: {
+    primaryPrefix: "축적형",
+    altPrefixes: ["안정형", "기반형", "묵직한"],
+    vibe: "묵직한 안정감과 지속성",
+  },
+  soyang: {
+    primaryPrefix: "확산형",
+    altPrefixes: ["에너지형", "직진형", "빠른 반응의"],
+    vibe: "빠른 반응과 표현력",
+  },
+  soeum: {
+    primaryPrefix: "내면형",
+    altPrefixes: ["섬세한", "고요한", "집중형"],
+    vibe: "신중함과 내적 안정",
+  },
+};
+
+function getCombinationKey(mbti: MbtiChoice, sasang: SasangTypeId): string {
+  return `${String(mbti).trim()}|${String(sasang).trim()}`;
+}
+
+function getMbtiNaming(mbtiChoice: MbtiChoice): MbtiNaming | null {
+  if (mbtiChoice === "unknown") return null;
+  return mbtiNaming[mbtiChoice] ?? null;
+}
+
+function getSasangNaming(sasang: SasangTypeId) {
+  return sasangNaming[sasang];
+}
+
+function chooseSasangPrefixForGeneratedTitle(args: {
+  sasang: SasangTypeId;
+  mbtiTone: string;
+  mbtiRole: string;
+}): string {
+  const { sasang, mbtiTone, mbtiRole } = args;
+  const s = getSasangNaming(sasang);
+
+  // "너무 기계적인 조합"을 줄이기 위한 간단한 보정 규칙
+  if (sasang === "soeum") {
+    if (mbtiTone === "분석" || mbtiTone === "내면") return "고요한";
+    if (mbtiTone === "관계") return "섬세한";
+    if (mbtiTone === "감각" || mbtiTone === "배려") return "섬세한";
+    return s.primaryPrefix; // 내면형
+  }
+
+  if (sasang === "taeum") {
+    if (mbtiRole === "메이커") return "안정형"; // "축적형 메이커"보다 자연스러운 편
+    return s.primaryPrefix; // 축적형
+  }
+
+  if (sasang === "soyang") {
+    if (mbtiTone === "직진" || mbtiRole === "플레이어") return "직진형";
+    if (mbtiTone === "실전") return "에너지형";
+    return s.primaryPrefix; // 확산형
+  }
+
+  // taeyang
+  if (sasang === "taeyang") {
+    if (mbtiTone === "전략" || mbtiTone === "발상" || mbtiTone === "영감") return "비전형";
+    return s.primaryPrefix; // 돌파형
+  }
+
+  return s.primaryPrefix;
+}
+
+function generateResultTitle(mbtiChoice: MbtiChoice, sasang: SasangTypeId): string {
+  if (mbtiChoice === "unknown") {
+    return "나를 더 알아보는 관점 탐색자";
+  }
+
+  const mbti = getMbtiNaming(mbtiChoice);
+  if (!mbti) return "나를 더 알아보는 관점 탐색자";
+
+  const { role, tone } = mbti;
+  const sasangPrefix = chooseSasangPrefixForGeneratedTitle({
+    sasang,
+    mbtiTone: tone,
+    mbtiRole: role,
+  });
+
+  // 요청된 보정/예시 톤을 반영한 특수 템플릿(과도한 하드코딩은 피하고, 역할/톤 기반으로 최소만)
+  if (role === "조율자" && tone === "통찰" && sasang === "soeum") {
+    return "깊은 통찰의 조율자";
+  }
+
+  if (role === "동기부여가") {
+    // "내면형 동기부여가" 같은 어색함을 피하기 위해 토ন 단어(관계)를 함께 사용
+    return `${sasangPrefix} ${tone} ${role}`;
+  }
+
+  if (role === "탐구자" && tone === "분석" && sasang === "soeum") {
+    // "고요한 분석 탐구자"처럼 분석 톤이 살아나게
+    return `${sasangPrefix} 분석 ${role}`;
+  }
+
+  if (role === "관리자" && tone === "원칙") {
+    // "축적형 원칙 관리자" 같은 자연스러운 연결
+    return `${sasangPrefix} 원칙 ${role}`;
+  }
+
+  if (role === "설계자" && tone === "전략" && sasang === "taeyang") {
+    // "냉철한 비전형 설계자" 톤
+    return `냉철한 ${sasangPrefix} ${role}`;
+  }
+
+  if (role === "플레이어" && sasang === "soyang") {
+    // 직진형 플레이어는 '현실' 단어를 붙이면 소개처럼 자연스러움
+    return `${sasangPrefix} 현실 ${role}`;
+  }
+
+  return `${sasangPrefix} ${role}`;
+}
+
+function getResultTitle(mbtiChoice: MbtiChoice, sasang: SasangTypeId): string {
+  const combinationKey = getCombinationKey(mbtiChoice, sasang);
+  const customTitle = getCustomResultTitle(combinationKey);
+  if (customTitle) return customTitle;
+  return generateResultTitle(mbtiChoice, sasang);
+}
+
+function getCustomResultTitle(combinationKey: string): string | null {
+  const card = RESULT_CARD_OVERRIDES[combinationKey];
+  return card?.resultTitle ?? null;
+}
+
+/**
+ * 개발/검증용: 64개 조합의 결과명을 만들어 확인할 수 있는 헬퍼
+ */
+export function getAllCombinationTitles(): Array<{
+  combinationKey: string;
+  title: string;
+}> {
+  const sasangKeys = Object.keys(SASangMetaToIds()) as SasangTypeId[];
+  const out: Array<{ combinationKey: string; title: string }> = [];
+  for (const mbti of MBTI_ORDER) {
+    for (const sasang of sasangKeys) {
+      const key = getCombinationKey(mbti, sasang);
+      out.push({ combinationKey: key, title: getResultTitle(mbti, sasang) });
+    }
+  }
+  return out;
+}
+
+function SASangMetaToIds(): Record<SasangTypeId, unknown> {
+  // SASANG_META는 타입만으로도 충분하지만, 런타임에서도 id 키를 뽑기 위해 사용
+  return SASANG_META as unknown as Record<SasangTypeId, unknown>;
+}
 
 function getMbtiEntry(mbtiChoice: MbtiChoice): MbtiDataEntry {
   if (mbtiChoice === "unknown") return unknownMbtiData;
@@ -60,8 +247,8 @@ function buildResultBase(
         : "모름";
 
   const resultMeta = `${mbtiLabel} × ${sasangMeta.name}`;
-  const overrideKey = resultOverrideKey(mbtiChoice, sasang);
-  const card = RESULT_CARD_OVERRIDES[overrideKey];
+  const combinationKey = getCombinationKey(mbtiChoice, sasang);
+  const card = RESULT_CARD_OVERRIDES[combinationKey];
 
   const coreFeatures = [
     mbtiEntry.traits[0],
@@ -70,8 +257,7 @@ function buildResultBase(
     sasangMeta.traits[1],
   ];
 
-  const resultTitle =
-    card?.resultTitle ?? `${mbtiEntry.label} ${sasangMeta.name}`;
+  const resultTitle = getResultTitle(mbtiChoice, sasang);
 
   const summary = card?.summary ?? firstSentence(mbtiEntry.summary);
   const traits = card?.traits ?? defaultTraitsFromCore(coreFeatures);
